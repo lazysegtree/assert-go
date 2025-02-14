@@ -3,6 +3,7 @@ package assert
 import (
 	"strings"
 	"testing"
+	"github.com/google/uuid"
 )
 
 func TestAssert_SuccessCase(t *testing.T) {
@@ -254,6 +255,8 @@ func TestAssert_NilValues(t *testing.T) {
 func TestAssert_EmptyValues(t *testing.T) {
 	t.Parallel()
 
+	id := uuid.New().String()
+
 	defer func() {
 		r := recover()
 		if r == nil {
@@ -279,11 +282,11 @@ func TestAssert_EmptyValues(t *testing.T) {
 
 		// Verify source context exists
 		if err.SourceContext == "" {
-			t.Error("expected non-empty source context")
+			t.Errorf("(#%s)expected non-empty source context. Its '%s'", id, err.SourceContext)
 		}
 	}()
 
-	Assert(false, "empty values test",
+	Assert(false, "empty values test : #" + id,
 		"empty_string", "",
 		"empty_slice", []string{},
 		"empty_map", map[string]int{},

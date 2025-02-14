@@ -36,6 +36,8 @@ func Assert(condition bool, msg string, values ...any) {
 // Assert panics if the condition is false. Configurable via SetConfig.
 // skipFrames is the number of stack frames to skip when getting the source context. 
 func assert(condition bool, msg string, skipFrames int, values ...any) {
+	fmt.Printf("(test : %s) assert() begins with condition : %v\n",msg, condition)
+
 	if condition {
 		return // Assertion met
 	}
@@ -43,8 +45,11 @@ func assert(condition bool, msg string, skipFrames int, values ...any) {
 
 	_, file, line, ok := runtime.Caller(skipFrames)
 
+
+
 	// Could not get Caller info
 	if !ok {
+		fmt.Printf("(test : %s) - could not get caller info\n", msg)
 		panic(AssertionError{
 			Message: msg,
 		})
@@ -63,10 +68,13 @@ func assert(condition bool, msg string, skipFrames int, values ...any) {
 		}
 	}
 
+	fmt.Printf("(test : %s) dump info size : %d, source wanted : %v\n",msg, len(dumpInfo), activeConfig.IncludeSource)
+
 	// Get source context if enabled
 	var sourceContext string
 	if activeConfig.IncludeSource {
 		sourceContext = getSourceContext(file, line, activeConfig.ContextLines)
+		fmt.Printf("(test : %s)Added source context string of len : %d\n",msg, len(sourceContext))
 	}
 
 	err := AssertionError{
@@ -83,6 +91,7 @@ func assert(condition bool, msg string, skipFrames int, values ...any) {
 func getSourceContext(file string, line int, contextLines int) string {
 	f, err := os.Open(file)
 	if err != nil {
+		fmt.Println("getSourceContext couldn't open file : ", file)
 		return ""
 	}
 	defer f.Close()
@@ -111,5 +120,9 @@ func getSourceContext(file string, line int, contextLines int) string {
 		currentLine++
 	}
 
-	return strings.Join(lines, "\n")
+
+	res := strings.Join(lines, "\n")
+
+	fmt.Printf("Read %d lines, Returning context of size %d\n", currentLine, len(res))
+	return res
 }
